@@ -1,0 +1,31 @@
+<div id="container" style="width:1000px;">
+
+  <div id="header" style="background-color:#FFA500;">
+    <h1 style="margin-bottom:0;">扫雷</h1>
+  </div>
+
+  <div id="menu" style="background-color:#FFD700;height:600px;width:100px;float:left;">
+    <b>游戏类型</b>
+    <br />
+    蜂巢<input type="radio"   name="xxx" checked value="1" (click)="changeGameType($event)"/> 
+    <br />
+    矩形<input type="radio"   name="xxx"  value="2" (click)="changeGameType($event)"/> 
+    <br />
+    三角<input type="radio"   name="xxx"  value="3" (click)="changeGameType($event)"/> 
+    <br />
+    随机<input type="radio"   name="xxx"  value="4" (click)="changeGameType($event)"/> 
+    <br>
+  </div>
+
+  <div id="content" style="background-color:#EEEEEE;height:600px;float:left;">
+    <canvas #myCanvas width="800" height="600" (contextmenu)="onRightClick($event)" (click)="onUserClick($event)">
+    </canvas>
+  </div>
+  <div id="content" style="background-color:rgb(235, 85, 85);height:600px;width:100px;float:right;">
+    <button (click)="newGame()">新的游戏</button>
+  </div>
+
+  <div id="footer" style="background-color:#FFA500;clear:both;text-align:center;">
+    版权 © zhengwei</div>
+
+</div>
