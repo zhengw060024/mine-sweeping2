@@ -1,6 +1,6 @@
 import { VisitFlagState, PointRng , MineGameState, UserCheckFlag,
     generateSequenceN , CheckPointInRng} from './mine-rng-interface';
-import { MineSubRng, MineGameRng} from './mine-game-rng';
+import { MineSubRng, MineGameRng, MineGameRngAg } from './mine-game-rng';
 
 enum NeighborDirectHexagon {
     up_right = 0,
@@ -133,8 +133,6 @@ class MineSubRngHexagon extends MineSubRng {
         }
         // 插入新的位置
         this.m_arrayNeighbor.splice(i, 0, [direction, newRng]);
-    }
-    initRngArea(pointStart: PointRng, sideLength: number) {
     }
 
     initMineNum() {
@@ -545,9 +543,6 @@ class MineSubRngHexagon extends MineSubRng {
             MineSubRngHexagon.m_drawTool.fillText(this.m_nMineNumNeighbor.toString(), centerx - 5 * nLength - 1, centery + 6);
         }
     }
-    drawGameFailed() {
-
-    }
     printSelf() {
         let strid: string = this.m_id.toString();
         this.m_arrayNeighbor.forEach((value, index) => {
@@ -570,8 +565,7 @@ class MineSubRngHexagon extends MineSubRng {
 
 }
 
-export class MineRngCellular extends MineGameRng {
-    private m_arrayRng: Array<MineSubRngHexagon>;
+export class MineRngCellular extends MineGameRngAg<MineSubRngHexagon> {
     private m_maxNestNum: number;
     private m_startPoint: PointRng;
     constructor(nMaxNum: number, pointStart: PointRng) {
@@ -585,37 +579,7 @@ export class MineRngCellular extends MineGameRng {
             value.printSelf();
         });
     }
-    checkGameIsover() {
-        //
-        let bSuccess = true;
-        for (let i = 0; i < this.m_arrayRng.length; ++i) {
-            const value = this.m_arrayRng[i];
-            // 先判断有没有失败
-            if (value.isMine()) {
-                if (value.isOpened()) {
-                    return MineGameState.GameStateEndFailed;
-                }
-                if (!value.isCheckedMine()) {
-                    bSuccess = false;
-                }
-            } else {
-                if (!value.isOpened()) {
-                    bSuccess = false;
-                }
-            }
-        }
-        if (bSuccess) {
-            return MineGameState.GameStateEndSuccess;
-        } else {
-            return MineGameState.GameStateContinue;
-        }
-    }
-    drawRngFailed() {
-        this.clearDrawRect();
-        this.m_arrayRng.forEach((value, key) => {
-            value.drawRngFailed();
-        });
-    }
+
     makeNeighbor(oldNest: MineSubRngHexagon, newNest: MineSubRngHexagon, direct: NeighborDirectHexagon) {
         oldNest.addNewDirection(newNest, direct);
         const oppositeDirection = MineSubRngHexagon.getOppositeDirect(direct);
@@ -660,37 +624,6 @@ export class MineRngCellular extends MineGameRng {
         // 生成地雷
         this.generateMine(15);
         // 生成地雷数目
-    }
-
-    onOpenSubRng(clickedRng: MineSubRng) {
-        // 广度优先遍历
-        clickedRng.onClickRng();
-    }
-    // 判断鼠标落点
-    onCheckPointInRng(point: PointRng): MineSubRng | null {
-        for (let i = 0; i < this.m_arrayRng.length; ++i) {
-            if (this.m_arrayRng[i].checkClickInRng(point)) {
-                return this.m_arrayRng[i];
-            }
-        }
-        return null;
-    }
-
-    drawRng() {
-        this.clearDrawRect();
-        this.m_arrayRng.forEach((value, key) => {
-            value.drawRng();
-        });
-    }
-    private generateMine(maxMine: number) {
-        const ArrayMine = generateSequenceN(this.m_arrayRng.length - 1, maxMine);
-        console.log(`mine area is ${ArrayMine}`);
-        ArrayMine.forEach((value, index) => {
-            this.m_arrayRng[value].setMine();
-        });
-        this.m_arrayRng.forEach((value, index) => {
-            value.initMineNum();
-        });
     }
     private initAllRngPos() {
         this.m_arrayRng.forEach((value, index) => {

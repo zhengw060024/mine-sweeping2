@@ -1,4 +1,4 @@
-import { VisitFlagState, PointRng , MineGameState, UserCheckFlag} from './mine-rng-interface';
+import { VisitFlagState, PointRng , MineGameState, UserCheckFlag, generateSequenceN} from './mine-rng-interface';
 export abstract class MineGameRng {
     static m_drawTools: CanvasRenderingContext2D;
     static m_gameState: MineGameState;
@@ -10,6 +10,10 @@ export abstract class MineGameRng {
     abstract drawRngFailed();
     protected abstract onCheckPointInRng(point: PointRng): MineSubRng | null;
     abstract checkGameIsover(): MineGameState;
+    onOpenSubRng(clickedRng: MineSubRng) {
+        // 广度优先遍历
+        clickedRng.onClickRng();
+    }
     OnLeftMouseDown(point: PointRng) {
         const Temp = this.onCheckPointInRng(point);
         if (Temp) {
@@ -23,6 +27,66 @@ export abstract class MineGameRng {
             Temp.onRCheckRng();
         }
         return Temp;
+    }
+}
+export abstract class MineGameRngAg<T extends MineSubRng> extends MineGameRng {
+    protected m_arrayRng: Array<T>;
+
+    protected generateMine(maxMine: number) {
+        const ArrayMine = generateSequenceN(this.m_arrayRng.length - 1, maxMine);
+        console.log(`mine area is ${ArrayMine}`);
+        ArrayMine.forEach((value, index) => {
+            this.m_arrayRng[value].setMine();
+        });
+        this.m_arrayRng.forEach((value, index) => {
+            value.initMineNum();
+        });
+    }
+      // 判断鼠标落点
+      onCheckPointInRng(point: PointRng): MineSubRng | null {
+        for (let i = 0; i < this.m_arrayRng.length; ++i) {
+            if (this.m_arrayRng[i].checkClickInRng(point)) {
+                return this.m_arrayRng[i];
+            }
+        }
+        return null;
+    }
+    checkGameIsover() {
+        //
+        let bSuccess = true;
+        for (let i = 0; i < this.m_arrayRng.length; ++i) {
+            const value = this.m_arrayRng[i];
+            // 先判断有没有失败
+            if (value.isMine()) {
+                if (value.isOpened()) {
+                    return MineGameState.GameStateEndFailed;
+                }
+                if (!value.isCheckedMine()) {
+                    bSuccess = false;
+                }
+            } else {
+                if (!value.isOpened()) {
+                    bSuccess = false;
+                }
+            }
+        }
+        if (bSuccess) {
+            return MineGameState.GameStateEndSuccess;
+        } else {
+            return MineGameState.GameStateContinue;
+        }
+    }
+    drawRngFailed() {
+        this.clearDrawRect();
+        this.m_arrayRng.forEach((value, key) => {
+            value.drawRngFailed();
+        });
+    }
+    drawRng() {
+        this.clearDrawRect();
+        this.m_arrayRng.forEach((value, key) => {
+            value.drawRng();
+        });
     }
 }
 export abstract class MineSubRng {
@@ -45,9 +109,11 @@ export abstract class MineSubRng {
     static setDrawTool(ctx: CanvasRenderingContext2D) {
         MineSubRng.m_drawTool = ctx;
     }
+    abstract initMineNum(): void;
     abstract drawRng(): void;
+    abstract drawRngFailed(): void;
     abstract getNeighborMineNum(): number;
-
+    abstract checkClickInRng(pointTocheck: PointRng): boolean;
     protected getVisitState(): VisitFlagState {
         return this.m_visitTempFlag;
     }

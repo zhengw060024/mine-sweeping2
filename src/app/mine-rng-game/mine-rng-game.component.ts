@@ -25,7 +25,7 @@ export class MineRngGameComponent implements OnInit {
     this.gameStateResult = new EventEmitter();
   }
   changeGameType($event) {
-    this.m_GameType = $event.target.value;
+    this.m_GameType = parseInt($event.target.value , 10) ;
     console.log(this.m_GameType);
   }
   newGame() {
@@ -34,6 +34,7 @@ export class MineRngGameComponent implements OnInit {
       this.m_dataGame.getMineRngCellular(300, 300);
       break;
       case GameType.game_Sque:
+      this.m_dataGame.getMineRngSquare(20, 20);
       break;
       case GameType.game_Triangle:
       break;

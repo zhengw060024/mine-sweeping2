@@ -1,6 +1,8 @@
-import { VisitFlagState, PointRng , MineGameState, UserCheckFlag,
-    generateSequenceN , CheckPointInRng} from './mine-rng-interface';
-import { MineSubRng, MineGameRng} from './mine-game-rng';
+import {
+    VisitFlagState, PointRng, MineGameState, UserCheckFlag,
+    generateSequenceN, CheckPointInRng
+} from './mine-rng-interface';
+import { MineSubRng, MineGameRng, MineGameRngAg } from './mine-game-rng';
 export enum NeighborDirectSqu {
     up,
     up_right,
@@ -17,9 +19,19 @@ class MineSubRngSquare extends MineSubRng {
     constructor(id: number) {
         super();
         this.m_id = id;
+        this.m_arrayNeighbor = [];
+        this.m_arrayPoint = [];
+    }
+    initMineNum() {
+        this.m_arrayNeighbor.forEach((value, index) => {
+            const temp1 = value[1];
+            if (temp1.m_bIsMine === true) {
+                ++this.m_nMineNumNeighbor;
+            }
+        });
     }
     checkClickInRng(pointTocheck: PointRng) {
-        return true;
+        return CheckPointInRng(this.m_arrayPoint, pointTocheck);
     }
     addNewDirection(newRng: MineSubRngSquare, direction: NeighborDirectSqu) {
         let i = 0;
@@ -59,12 +71,179 @@ class MineSubRngSquare extends MineSubRng {
         });
     }
 
+    drawFrame() {
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[0].x, this.m_arrayPoint[0].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[1].x, this.m_arrayPoint[1].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[2].x, this.m_arrayPoint[2].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[3].x, this.m_arrayPoint[3].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[0].x, this.m_arrayPoint[0].y);
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.closePath();
+    }
+    drawUnCheck() {
+        this.drawFrame();
+
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[0].x + 2, this.m_arrayPoint[0].y + 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[1].x - 2, this.m_arrayPoint[1].y + 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[2].x - 2, this.m_arrayPoint[2].y - 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[3].x + 2, this.m_arrayPoint[3].y - 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[0].x + 2, this.m_arrayPoint[0].y + 2);
+
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fillStyle = 'green';
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+    }
+    drawCheckMayMine() {
+        this.drawUnCheck();
+        const x = this.m_arrayPoint[1].x - this.m_arrayPoint[0].x;
+        const y = this.m_arrayPoint[3].y - this.m_arrayPoint[0].y;
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.arc(this.m_arrayPoint[0].x + x / 2, this.m_arrayPoint[0].y + y / 2, x / 4, 0, 2 * Math.PI);
+        MineSubRng.m_drawTool.fillStyle = 'blue';
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+    }
+    drawCheckMine() {
+        this.drawUnCheck();
+        const x = this.m_arrayPoint[1].x - this.m_arrayPoint[0].x;
+        const y = this.m_arrayPoint[3].y - this.m_arrayPoint[0].y;
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.arc(this.m_arrayPoint[0].x + x / 2, this.m_arrayPoint[0].y + y / 2, x / 4, 0, 2 * Math.PI);
+        MineSubRng.m_drawTool.fillStyle = 'red';
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+    }
+    drawRngOpen() {
+        this.drawFrame();
+
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[0].x + 2, this.m_arrayPoint[0].y + 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[1].x - 2, this.m_arrayPoint[1].y + 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[2].x - 2, this.m_arrayPoint[2].y - 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[3].x + 2, this.m_arrayPoint[3].y - 2);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[0].x + 2, this.m_arrayPoint[0].y + 2);
+
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fillStyle = 'blue';
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+        const x = this.m_arrayPoint[1].x - this.m_arrayPoint[0].x;
+        const y = this.m_arrayPoint[3].y - this.m_arrayPoint[0].y;
+        const centerx = this.m_arrayPoint[0].x + x / 2;
+        const centery = this.m_arrayPoint[0].y + y / 2;
+        if (this.m_nMineNumNeighbor !== 0) {
+            MineSubRng.m_drawTool.fillStyle = 'red';
+            MineSubRng.m_drawTool.font = '20px Georgia';
+            const nLength = this.m_nMineNumNeighbor.toString().length;
+            MineSubRng.m_drawTool.fillText(this.m_nMineNumNeighbor.toString(), centerx - 5 * nLength - 1, centery + 6);
+        }
+
+    }
+    drawErrorMine() {
+        this.drawUnCheck();
+        const x = this.m_arrayPoint[1].x - this.m_arrayPoint[0].x;
+        const y = this.m_arrayPoint[3].y - this.m_arrayPoint[0].y;
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.arc(this.m_arrayPoint[0].x + x / 2, this.m_arrayPoint[0].y + y / 2, x / 4, 0, 2 * Math.PI);
+        MineSubRng.m_drawTool.fillStyle = 'black';
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+        MineSubRng.m_drawTool.strokeStyle = '#FF0000';
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[0].x, this.m_arrayPoint[0].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[2].x, this.m_arrayPoint[2].y);
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[1].x, this.m_arrayPoint[1].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[3].x, this.m_arrayPoint[3].y);
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.strokeStyle = '#000000';
+    }
+    drawNomalMineCheck() {
+        this.drawUnCheck();
+        const x = this.m_arrayPoint[1].x - this.m_arrayPoint[0].x;
+        const y = this.m_arrayPoint[3].y - this.m_arrayPoint[0].y;
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.arc(this.m_arrayPoint[0].x + x / 2, this.m_arrayPoint[0].y + y / 2, x / 4, 0, 2 * Math.PI);
+        MineSubRng.m_drawTool.fillStyle = 'black';
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+    }
+    drawNormalMineUnCheck() {
+        this.drawUnCheck();
+        const x = this.m_arrayPoint[1].x - this.m_arrayPoint[0].x;
+        const y = this.m_arrayPoint[3].y - this.m_arrayPoint[0].y;
+        MineSubRng.m_drawTool.beginPath();
+        MineSubRng.m_drawTool.arc(this.m_arrayPoint[0].x + x / 2, this.m_arrayPoint[0].y + y / 2, x / 4, 0, 2 * Math.PI);
+        MineSubRng.m_drawTool.fillStyle = 'black';
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.fill();
+        MineSubRng.m_drawTool.closePath();
+    }
+    drawNormalError() {
+        this.drawRngOpen();
+        MineSubRng.m_drawTool.strokeStyle = '#FF0000';
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[0].x, this.m_arrayPoint[0].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[2].x, this.m_arrayPoint[2].y);
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.moveTo(this.m_arrayPoint[1].x, this.m_arrayPoint[1].y);
+        MineSubRng.m_drawTool.lineTo(this.m_arrayPoint[3].x, this.m_arrayPoint[3].y);
+        MineSubRng.m_drawTool.stroke();
+        MineSubRng.m_drawTool.strokeStyle = '#000000';
+    }
+    drawRngClose() {
+        switch (this.m_userCheckState) {
+            case UserCheckFlag.UserCheckFlag_none:
+                this.drawUnCheck();
+                break;
+            case UserCheckFlag.UserCheckFlag_maybemie:
+                this.drawCheckMayMine();
+                break;
+            case UserCheckFlag.UserCheckFlag_mine:
+                this.drawCheckMine();
+                break;
+            default:
+                break;
+        }
+    }
+    drawNormalNone() {
+        this.drawRngOpen();
+    }
     drawRng() {
+        if (this.m_bIsOpend === false) {
+            this.drawRngClose();
+        } else {
+            this.drawRngOpen();
+        }
+    }
+    drawRngFailed() {
+        if (this.m_bIsMine) {
+            // this.drawRngClose();
+            if (this.m_bIsOpend) {
+                this.drawErrorMine();
+            } else {
+                if (this.m_userCheckState === UserCheckFlag.UserCheckFlag_mine) {
+                    this.drawNomalMineCheck();
+                } else {
+                    this.drawNormalMineUnCheck();
+                }
+            }
+        } else {
+            if (this.m_userCheckState === UserCheckFlag.UserCheckFlag_mine) {
+                this.drawNormalError();
+            } else {
+                this.drawNormalNone();
+            }
+        }
     }
 }
 
-class MineRngSquare extends MineGameRng {
-    private m_arrayRng: Array<MineSubRngSquare>;
+export class MineRngSquare extends MineGameRngAg<MineSubRngSquare> {
     private m_row: number;
     private m_col: number;
     private m_pointStart: PointRng;
@@ -74,6 +253,8 @@ class MineRngSquare extends MineGameRng {
         this.m_col = col;
         this.m_row = row;
         this.m_pointStart = startPoit;
+        this.m_arrayRng = [];
+        this.m_sideLength = sideLength;
     }
     createRng() {
         let kIndex = 0;
@@ -83,37 +264,11 @@ class MineRngSquare extends MineGameRng {
                 ++kIndex;
             }
         }
-    }
-    drawRng() {
-    }
-    drawRngFailed() {
-
-    }
-    onOpenSubRng(clickedRng: MineSubRng) {
-        // 广度优先遍历
-        clickedRng.onClickRng();
-    }
-    checkGameIsover() {
-        return MineGameState.GameStateContinue;
-    }
-    // 判断鼠标落点
-    onCheckPointInRng(point: PointRng): MineSubRng | null {
-        for (let i = 0; i < this.m_arrayRng.length; ++i) {
-            if (this.m_arrayRng[i].checkClickInRng(point)) {
-                return this.m_arrayRng[i];
-            }
-        }
-        return null;
-    }
-    private generateMine(maxMine: number) {
-        const ArrayMine = generateSequenceN(this.m_arrayRng.length - 1, maxMine);
-        console.log(`mine area is ${ArrayMine}`);
-        ArrayMine.forEach((value, index) => {
-            this.m_arrayRng[value].setMine();
-        });
+        this.generateMine(50);
     }
     private createNewSubRng(i: number, j: number, currentIndex: number) {
         const newRng = new MineSubRngSquare(currentIndex);
+        this.m_arrayRng.push(newRng);
         // 初始化他的邻居，从up方向开始，顺时针方向,对所有存在邻居建立索引
         if (i > 0) {
             const upRngKey = currentIndex - this.m_col;
