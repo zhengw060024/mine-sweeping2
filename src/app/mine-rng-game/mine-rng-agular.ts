@@ -3,6 +3,7 @@ import { MineSubRng, MineGameRng} from './mine-game-rng';
 import { PointRng , MineGameState} from './mine-rng-interface';
 import { MineRngCellular } from './mine-nest-rng-game';
 import { MineRngSquare } from './mine-square-rng-game';
+import { MineRngTriangle } from './mine-triangle-rng-game';
 export class MineRngAgular {
     m_gameRng: MineGameRng;
     m_eventGameResult: EventEmitter<MineGameState>;
@@ -26,6 +27,16 @@ export class MineRngAgular {
         MineGameRng.m_drawTools = this.m_ctx;
         MineGameRng.m_gameState = MineGameState.GameStateContinue;
         const RngTemp = new MineRngSquare(20, 20, { x: x, y: y }, 28);
+        RngTemp.createRng();
+        RngTemp.drawRng();
+        this.m_gameRng = RngTemp;
+        return RngTemp;
+    }
+    getMineRngTriangle(x: number, y: number) {
+        MineSubRng.setDrawTool(this.m_ctx);
+        MineGameRng.m_drawTools = this.m_ctx;
+        MineGameRng.m_gameState = MineGameState.GameStateContinue;
+        const RngTemp = new MineRngTriangle(20, 20, { x: x, y: y }, 40);
         RngTemp.createRng();
         RngTemp.drawRng();
         this.m_gameRng = RngTemp;

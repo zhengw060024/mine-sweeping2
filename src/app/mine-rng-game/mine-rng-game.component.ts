@@ -37,6 +37,7 @@ export class MineRngGameComponent implements OnInit {
       this.m_dataGame.getMineRngSquare(20, 20);
       break;
       case GameType.game_Triangle:
+      this.m_dataGame.getMineRngTriangle(20, 20);
       break;
       case GameType.game_Random:
       break;
