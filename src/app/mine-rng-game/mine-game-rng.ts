@@ -1,7 +1,8 @@
-import { VisitFlagState, PointRng , MineGameState, UserCheckFlag, generateSequenceN} from './mine-rng-interface';
+import { VisitFlagState, PointRng, MineGameState, UserCheckFlag, generateSequenceN, generateRandom } from './mine-rng-interface';
 export abstract class MineGameRng {
     static m_drawTools: CanvasRenderingContext2D;
     static m_gameState: MineGameState;
+    protected m_bRandomRng ;
     protected clearDrawRect() {
         MineGameRng.m_drawTools.clearRect(0, 0, MineGameRng.m_drawTools.canvas.width, MineGameRng.m_drawTools.canvas.height);
     }
@@ -28,10 +29,42 @@ export abstract class MineGameRng {
         }
         return Temp;
     }
+    constructor() {
+        this.m_bRandomRng = false;
+    }
+    setRandom(bRandom: boolean) {
+        this.m_bRandomRng = bRandom;
+    }
 }
 export abstract class MineGameRngAg<T extends MineSubRng> extends MineGameRng {
     protected m_arrayRng: Array<T>;
 
+    constructor() {
+        super();
+    }
+
+    adjuestToRandomRng() {
+        const numberRngToRemove = generateRandom(5, 15);
+        const ArraySubRngToRemove = generateSequenceN(this.m_arrayRng.length - 1, numberRngToRemove);
+        const tempSet: Set<number> = new Set<number>();
+        ArraySubRngToRemove.forEach(item => {
+            tempSet.add(item);
+        });
+        for (let i = this.m_arrayRng.length - 1; i >= 0; --i) {
+            const TempItem = this.m_arrayRng[i];
+            if (tempSet.has(TempItem.getId())) {
+                this.m_arrayRng.splice(i, 1);
+            } else {
+                //
+                TempItem.removeNeighborItem(tempSet);
+            }
+        }
+        // this.m_arrayRng.forEach((value, index) => {
+        //     if (tempSet.has(value.getId())) {
+        //         this.m
+        //     }
+        // });
+    }
     protected generateMine(maxMine: number) {
         const ArrayMine = generateSequenceN(this.m_arrayRng.length - 1, maxMine);
         console.log(`mine area is ${ArrayMine}`);
@@ -42,8 +75,8 @@ export abstract class MineGameRngAg<T extends MineSubRng> extends MineGameRng {
             value.initMineNum();
         });
     }
-      // 判断鼠标落点
-      onCheckPointInRng(point: PointRng): MineSubRng | null {
+    // 判断鼠标落点
+    onCheckPointInRng(point: PointRng): MineSubRng | null {
         for (let i = 0; i < this.m_arrayRng.length; ++i) {
             if (this.m_arrayRng[i].checkClickInRng(point)) {
                 return this.m_arrayRng[i];
@@ -112,8 +145,8 @@ export abstract class MineSubRng {
     abstract initMineNum(): void;
     abstract drawRng(): void;
     abstract drawRngFailed(): void;
-    abstract getNeighborMineNum(): number;
     abstract checkClickInRng(pointTocheck: PointRng): boolean;
+    abstract removeNeighborItem(numberSet: Set<number> );
     protected getVisitState(): VisitFlagState {
         return this.m_visitTempFlag;
     }
@@ -122,6 +155,13 @@ export abstract class MineSubRng {
 
     }
     // abstract checkClickInRng():boolean;
+    //
+    getNeighborMineNum(): number {
+        return this.m_nMineNumNeighbor;
+    }
+    getId() {
+        return this.m_id;
+    }
     isMine(): boolean {
         return this.m_bIsMine;
     }

@@ -30,6 +30,14 @@ class MineSubRngSquare extends MineSubRng {
             }
         });
     }
+    removeNeighborItem(numberSet: Set<number> ) {
+        for (let i = this.m_arrayNeighbor.length - 1; i >= 0 ; --i) {
+            const Temp = this.m_arrayNeighbor[i][1];
+            if (numberSet.has(Temp.getId())) {
+                this.m_arrayNeighbor.splice(i, 1);
+            }
+        }
+    }
     checkClickInRng(pointTocheck: PointRng) {
         return CheckPointInRng(this.m_arrayPoint, pointTocheck);
     }
@@ -61,9 +69,7 @@ class MineSubRngSquare extends MineSubRng {
             y: pointStart.y + sideLength
         });
     }
-    getNeighborMineNum(): number {
-        return this.m_nMineNumNeighbor;
-    }
+
 
     protected forEveryDirection(callback: (value: MineSubRng) => void) {
         return this.m_arrayNeighbor.forEach((value, index) => {
@@ -263,6 +269,9 @@ export class MineRngSquare extends MineGameRngAg<MineSubRngSquare> {
                 this.createNewSubRng(i, j, kIndex);
                 ++kIndex;
             }
+        }
+        if (this.m_bRandomRng) {
+            this.adjuestToRandomRng();
         }
         this.generateMine(50);
     }

@@ -31,17 +31,19 @@ export class MineRngGameComponent implements OnInit {
   newGame() {
     switch (this.m_GameType) {
       case GameType.game_Nest:
-      this.m_dataGame.getMineRngCellular(300, 300);
+      this.m_dataGame.getMineRngCellular();
       break;
       case GameType.game_Sque:
-      this.m_dataGame.getMineRngSquare(20, 20);
+      this.m_dataGame.getMineRngSquare();
       break;
       case GameType.game_Triangle:
-      this.m_dataGame.getMineRngTriangle(20, 20);
+      this.m_dataGame.getMineRngTriangle();
       break;
       case GameType.game_Random:
+      this.m_dataGame.generateRandomRng();
       break;
     }
+    this.m_dataGame.newGameNotify();
   }
   private getCrossBrowserElement(mouseEvent) {
     const result = {
@@ -104,6 +106,7 @@ export class MineRngGameComponent implements OnInit {
     const ctx: CanvasRenderingContext2D =
       this.canvasRef.nativeElement.getContext('2d');
     this.m_dataGame = new MineRngAgular(this.gameStateResult, ctx);
-    this.m_dataGame.getMineRngCellular(300, 300);
+    this.m_dataGame.getMineRngCellular();
+    this.m_dataGame.newGameNotify();
   }
 }

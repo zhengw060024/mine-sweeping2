@@ -9,9 +9,11 @@ export class AppComponent {
   title = 'sao lei';
   setGameState(gameState: MineGameState) {
     if (gameState === MineGameState.GameStateEndSuccess) {
-      this.title = 'you win!!!';
+      this.title = '你赢了';
     } else if (gameState === MineGameState.GameStateEndFailed) {
-      this.title = 'you failed';
+      this.title = '你输了';
+    } else if (gameState === MineGameState.GameStateNewGame) {
+        this.title = '新游戏';
     }
   }
 }

@@ -1,7 +1,8 @@
 export enum MineGameState {
     GameStateEndFailed = 0,
     GameStateEndSuccess = 1,
-    GameStateContinue = 2
+    GameStateContinue = 2,
+    GameStateNewGame = 3
 }
 export enum UserCheckFlag {
     UserCheckFlag_none = 0,

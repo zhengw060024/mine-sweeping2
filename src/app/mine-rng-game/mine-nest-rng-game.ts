@@ -11,7 +11,7 @@ enum NeighborDirectHexagon {
     left_up = 5
 }
 class MineSubRngHexagon extends MineSubRng {
-    private static m_ndepartCenter = 40;
+    private static m_ndepartCenter = 32;
     private static m_nH = MineSubRngHexagon.m_ndepartCenter * Math.sqrt(3) / 2;
     private static m_nW = MineSubRngHexagon.m_ndepartCenter / 2;
     private m_arrayNeighbor: Array<[NeighborDirectHexagon, MineSubRngHexagon]>;
@@ -145,9 +145,15 @@ class MineSubRngHexagon extends MineSubRng {
 
         });
     }
-    getNeighborMineNum(): number {
-        return this.m_nMineNumNeighbor;
+    removeNeighborItem(numberSet: Set<number> ) {
+        for (let i = this.m_arrayNeighbor.length - 1; i >= 0 ; --i) {
+            const Temp = this.m_arrayNeighbor[i][1];
+            if (numberSet.has(Temp.getId())) {
+                this.m_arrayNeighbor.splice(i, 1);
+            }
+        }
     }
+
 
     protected forEveryDirection(callback: (value: MineSubRng) => void) {
         return this.m_arrayNeighbor.forEach((value, index) => {
@@ -621,8 +627,11 @@ export class MineRngCellular extends MineGameRngAg<MineSubRngHexagon> {
             currentRng = this.m_arrayRng[currentCenterID];
         }
         this.initAllRngPos();
+        if (this.m_bRandomRng) {
+            this.adjuestToRandomRng();
+        }
         // 生成地雷
-        this.generateMine(15);
+        this.generateMine(45);
         // 生成地雷数目
     }
     private initAllRngPos() {
