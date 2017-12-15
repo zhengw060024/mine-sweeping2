@@ -41,7 +41,7 @@ export class MineRngAgular {
         MineSubRng.setDrawTool(this.m_ctx);
         MineGameRng.m_drawTools = this.m_ctx;
         MineGameRng.m_gameState = MineGameState.GameStateContinue;
-        const RngTemp = new MineRngTriangle(18, 30, { x: 20, y: 20 }, 40);
+        const RngTemp = new MineRngTriangle(16, 30, { x: 20, y: 20 }, 40);
         RngTemp.createRng();
         RngTemp.drawRng();
         this.m_gameRng = RngTemp;
@@ -63,7 +63,7 @@ export class MineRngAgular {
             RngTemp = new MineRngSquare(20, 20, { x: 20, y: 20 }, 28);
             break;
             case 2:
-            RngTemp = new MineRngTriangle(18, 30, { x: 20, y: 20 }, 40);
+            RngTemp = new MineRngTriangle(16, 30, { x: 20, y: 20 }, 40);
             break;
         }
         // RngTemp.se
